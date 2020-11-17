@@ -389,6 +389,7 @@ typedef struct {
     u32 max_sdea_service_specific_info_len;
     u32 max_subscribe_address;
     u32 ndpe_attr_supported;
+    bool is_instant_mode_supported;
 } NanCapabilities;
 
 /*
@@ -1032,6 +1033,13 @@ typedef struct {
     */
     u8 config_ndpe_attr;
     u32 use_ndpe_attr;
+    /*
+        Enable NAN v3.1 instant communication mode.
+        0 - Disable
+        1 - Enable
+    */
+    u8 config_enable_instant_mode;
+    u32 enable_instant_mode;
 } NanEnableRequest;
 
 /*
@@ -1516,6 +1524,13 @@ typedef struct {
     */
     u8 config_ndpe_attr;
     u32 use_ndpe_attr;
+    /*
+            Enable NAN v3.1 instant communication mode.
+            0 - Disable
+            1 - Enable
+    */
+    u8 config_enable_instant_mode;
+    u32 enable_instant_mode;
 } NanConfigRequest;
 
 /*

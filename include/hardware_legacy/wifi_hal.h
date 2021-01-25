@@ -65,6 +65,15 @@ typedef enum {
   WIFI_MITIGATION_EMERGENCY = 5,
 } wifi_thermal_mode;
 
+/*
+ * Wifi voice over IP mode
+ * may add new modes later, for example, voice + video over IP mode.
+ */
+typedef enum {
+  WIFI_VOIP_MODE_OFF = 0,
+  WIFI_VOIP_MODE_ON  = 1,
+} wifi_voip_mode;
+
 /* List of interface types supported */
 typedef enum {
   WIFI_INTERFACE_TYPE_STA = 0,
@@ -278,7 +287,7 @@ typedef enum {
     WIFI_DUAL_STA_NON_TRANSIENT_UNBIASED = 1
 } wifi_multi_sta_use_case;
 
-wifi_error wifi_multi_sta_set_use_case(wifi_handle hande, wifi_multi_sta_use_case use_case);
+wifi_error wifi_multi_sta_set_use_case(wifi_handle handle, wifi_multi_sta_use_case use_case);
 
 /* Configuration events */
 
@@ -409,6 +418,30 @@ typedef struct wlan_driver_wake_reason_cnt_t {
     RX_MULTICAST_WAKE_DATA_CNT rx_multicast_wake_pkt_info;
 } WLAN_DRIVER_WAKE_REASON_CNT;
 
+/* Wi-Fi coex channel avoidance support */
+
+#define WIFI_COEX_NO_POWER_CAP (int32_t)0x7FFFFFF
+
+typedef enum {
+    WIFI_AWARE = 1 << 0,
+    SOFTAP = 1 << 1,
+    WIFI_DIRECT = 1 << 2
+} wifi_coex_restriction;
+
+/**
+ * Representation of a Wi-Fi channel to be avoided for Wi-Fi coex channel avoidance.
+ *
+ * band is represented as an WLAN_MAC* enum value defined in wlan_mac_band.
+ * If power_cap_dbm is WIFI_COEX_NO_POWER_CAP, then no power cap should be applied if the specified
+ * channel is used.
+ */
+typedef struct {
+    wlan_mac_band band;
+    u32 channel;
+    s32 power_cap_dbm;
+} wifi_coex_unsafe_channel;
+
+
 /* include various feature headers */
 
 #include "gscan.h"
@@ -420,6 +453,7 @@ typedef struct wlan_driver_wake_reason_cnt_t {
 #include "wifi_nan.h"
 #include "wifi_offload.h"
 #include "roam.h"
+#include "wifi_twt.h"
 
 //wifi HAL function pointer table
 typedef struct {
@@ -664,8 +698,91 @@ typedef struct {
      * When there are 2 simultaneous STA connections, this use case hint
      * indicates what STA + STA use-case is being enabled by the framework.
      */
-    wifi_error (*wifi_multi_sta_set_use_case)(wifi_handle hande,
+    wifi_error (*wifi_multi_sta_set_use_case)(wifi_handle handle,
                                               wifi_multi_sta_use_case use_case);
+
+    /**
+     * Invoked to indicate that the following list of wifi_coex_unsafe_channel should be avoided
+     * with the specified restrictions.
+     * @param unsafeChannels list of current |wifi_coex_unsafe_channel| to avoid.
+     * @param restrictions bitmask of |wifi_coex_restriction| indicating wifi interfaces to
+     *         restrict from the current unsafe channels.
+     */
+    wifi_error (*wifi_set_coex_unsafe_channels)(wifi_handle handle, u32 num_channels,
+                                                wifi_coex_unsafe_channel *unsafeChannels,
+                                                u32 restrictions);
+
+    /**
+     * Invoked to set voip optimization mode for the provided STA iface
+     */
+    wifi_error (*wifi_set_voip_mode)(wifi_interface_handle iface, wifi_voip_mode mode);
+
+    /**@brief twt_register_handler
+     *        Request to register TWT callback before sending any TWT request
+     * @param wifi_interface_handle:
+     * @param TwtCallbackHandler: callback function pointers
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_twt_register_handler)(wifi_interface_handle iface,
+                                            TwtCallbackHandler handler);
+
+    /**@brief twt_get_capability
+     *        Request TWT capability
+     * @param wifi_interface_handle:
+     * @return Synchronous wifi_error and TwtCapabilitySet
+     */
+    wifi_error (*wifi_twt_get_capability)(wifi_interface_handle iface,
+                                          TwtCapabilitySet* twt_cap_set);
+
+    /**@brief twt_setup_request
+     *        Request to send TWT setup frame
+     * @param wifi_interface_handle:
+     * @param TwtSetupRequest: detailed parameters of setup request
+     * @return Synchronous wifi_error
+     * @return Asynchronous EventTwtSetupResponse CB return TwtSetupResponse
+    */
+    wifi_error (*wifi_twt_setup_request)(wifi_interface_handle iface,
+                                         TwtSetupRequest* msg);
+
+    /**@brief twt_teardown_request
+     *        Request to send TWT teardown frame
+     * @param wifi_interface_handle:
+     * @param TwtTeardownRequest: detailed parameters of teardown request
+     * @return Synchronous wifi_error
+     * @return Asynchronous EventTwtTeardownCompletion CB return TwtTeardownCompletion
+     * TwtTeardownCompletion may also be received due to other events
+     * like CSA, BTCX, TWT scheduler, MultiConnection, peer-initiated teardown, etc.
+     */
+    wifi_error (*wifi_twt_teardown_request)(wifi_interface_handle iface,
+                                            TwtTeardownRequest* msg);
+
+    /**@brief twt_info_frame_request
+     *        Request to send TWT info frame
+     * @param wifi_interface_handle:
+     * @param TwtInfoFrameRequest: detailed parameters in info frame
+     * @return Synchronous wifi_error
+     * @return Asynchronous EventTwtInfoFrameReceived CB return TwtInfoFrameReceived
+     * Driver may also receive Peer-initiated TwtInfoFrame
+     */
+    wifi_error (*wifi_twt_info_frame_request)(wifi_interface_handle iface,
+                                              TwtInfoFrameRequest* msg);
+
+    /**@brief twt_get_stats
+     *        Request to get TWT stats
+     * @param wifi_interface_handle:
+     * @param config_id: configuration ID of TWT request
+     * @return Synchronous wifi_error and TwtStats
+     */
+    wifi_error (*wifi_twt_get_stats)(wifi_interface_handle iface, u8 config_id,
+                                     TwtStats* stats);
+
+    /**@brief twt_clear_stats
+     *        Request to clear TWT stats
+     * @param wifi_interface_handle:
+     * @param config_id: configuration ID of TWT request
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_twt_clear_stats)(wifi_interface_handle iface, u8 config_id);
 
     /*
      * when adding new functions make sure to add stubs in

@@ -73,6 +73,13 @@ typedef enum {
     WIFI_POWER_SCENARIO_ON_BODY_CELL_OFF = 3,
     WIFI_POWER_SCENARIO_ON_BODY_CELL_ON  = 4,
     WIFI_POWER_SCENARIO_ON_BODY_BT       = 5,
+    WIFI_POWER_SCENARIO_ON_HEAD_HOTSPOT  = 6,
+    WIFI_POWER_SCENARIO_ON_HEAD_HOTSPOT_MMW = 7,
+    WIFI_POWER_SCENARIO_ON_BODY_CELL_ON_BT = 8,
+    WIFI_POWER_SCENARIO_ON_BODY_HOTSPOT = 9,
+    WIFI_POWER_SCENARIO_ON_BODY_HOTSPOT_BT = 10,
+    WIFI_POWER_SCENARIO_ON_BODY_HOTSPOT_MMW = 11,
+    WIFI_POWER_SCENARIO_ON_BODY_HOTSPOT_BT_MMW = 12,
 } wifi_power_scenario;
 
 typedef enum {
@@ -156,7 +163,7 @@ typedef struct {
 typedef enum {
   /* Filter Wifi channels that should be avoided due to cellular coex
    * restrictions. Some Wifi channels can have extreme interference
-   * from/to cellular due to short frequency seperation with neighboring
+   * from/to cellular due to short frequency separation with neighboring
    * cellular channels or when there is harmonic and intermodulation
    * interference. Channels which only have some performance degradation
    * (e.g. power back off is sufficient to deal with coexistence issue)
@@ -387,6 +394,7 @@ wifi_error wifi_reset_dscp_mapping(wifi_handle handle);
 wifi_error wifi_set_subsystem_restart_handler(wifi_handle handle,
                                               wifi_subsystem_restart_handler handler);
 
+wifi_error wifi_trigger_subsystem_restart(void);
 /**
  *  Wifi HAL Thermal Mitigation API
  *
@@ -876,6 +884,10 @@ typedef struct {
                                            u32 filter_mask, u32 max_size, u32* size,
                                            wifi_usable_channel* channels);
 
+    /**
+     * Trigger wifi subsystem restart to reload firmware
+     */
+    wifi_error (*wifi_trigger_subsystem_restart)(void);
     /*
      * when adding new functions make sure to add stubs in
      * hal_tool.cpp::init_wifi_stub_hal_func_table

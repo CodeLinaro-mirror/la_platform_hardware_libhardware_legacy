@@ -65,6 +65,14 @@ typedef enum {
     WIFI_CHAN_WIDTH_INVALID = -1
 } wifi_channel_width;
 
+/* Multi-Link Operation modes */
+typedef enum {
+  WIFI_MLO_MODE_DEFAULT          = 0,
+  WIFI_MLO_MODE_LOW_LATENCY      = 1,
+  WIFI_MLO_MODE_HIGH_THROUGHPUT  = 2,
+  WIFI_MLO_MODE_LOW_POWER        = 3,
+} wifi_mlo_mode;
+
 /* Pre selected Power scenarios to be applied from BDF file */
 typedef enum {
     WIFI_POWER_SCENARIO_INVALID          = -2,
@@ -234,6 +242,12 @@ typedef enum {
     WIFI_ACCESS_CATEGORY_VOICE = 3
 } wifi_access_category;
 
+/* Channel category mask */
+typedef enum {
+    WIFI_INDOOR_CHANNEL = 1 << 0,
+    WIFI_DFS_CHANNEL    = 1 << 1,
+} wifi_channel_category;
+
 /* Antenna configuration */
 typedef enum {
   WIFI_ANTENNA_UNSPECIFIED = 0,
@@ -281,13 +295,17 @@ typedef struct {
 
 typedef struct {
     /**
-     * Maximum number of links used in Multi-Link Operation. The maximum
-     * number of links used for MLO can be different from the number of
-     * radios supported by the chip.
+     * Maximum number of links supported by the chip for MLO association.
+     */
+    u32 max_mlo_association_link_count;
+    /**
+     * Maximum number of Simultaneous Transmit and Receive (STR) links used
+     * in Multi-Link Operation. The maximum number of STR links used can be
+     * different from the maximum number of radios supported by the chip.
      *
      * This is a static configuration of the chip.
      */
-    u32 max_mlo_link_count;
+    u32 max_mlo_str_link_count;
     /**
      * Maximum number of concurrent TDLS sessions supported by the chip.
      *
@@ -448,6 +466,8 @@ void wifi_get_error_info(wifi_error err, const char **msg); // return a pointer 
 #define WIFI_FEATURE_SET_LATENCY_MODE   (uint64_t)0x40000000  // Support Latency mode setting
 #define WIFI_FEATURE_P2P_RAND_MAC       (uint64_t)0x80000000  // Support P2P MAC randomization
 #define WIFI_FEATURE_INFRA_60G          (uint64_t)0x100000000 // Support for 60GHz Band
+#define WIFI_FEATURE_AFC_CHANNEL        (uint64_t)0x200000000 // Support for setting 6GHz AFC channel allowance
+#define WIFI_FEATURE_T2LM_NEGO          (uint64_t)0x400000000 // Support for TID-To-Link mapping negotiation
 // Add more features here
 
 #define IS_MASK_SET(mask, flags)        (((flags) & (mask)) == (mask))
@@ -864,18 +884,6 @@ typedef struct {
     wifi_error (*wifi_nan_data_end)(transaction_id id,
                                     wifi_interface_handle iface,
                                     NanDataPathEndRequest *msg);
-    wifi_error (*wifi_nan_pairing_request)(
-        transaction_id id, wifi_interface_handle iface,
-        NanPairingRequest *msg);
-    wifi_error (*wifi_nan_pairing_indication_response)(
-        transaction_id id, wifi_interface_handle iface,
-        NanPairingIndicationResponse *msg);
-    wifi_error (*wifi_nan_bootstrapping_request)(
-        transaction_id id, wifi_interface_handle iface,
-        NanBootstrappingRequest *msg);
-    wifi_error (*wifi_nan_bootstrapping_indication_response)(
-        transaction_id id, wifi_interface_handle iface,
-        NanBootstrappingIndicationResponse *msg);
     wifi_error (*wifi_select_tx_power_scenario)(wifi_interface_handle iface,
                                                 wifi_power_scenario scenario);
     wifi_error (*wifi_reset_tx_power_scenario)(wifi_interface_handle iface);
@@ -1182,9 +1190,72 @@ typedef struct {
     wifi_error (*wifi_get_supported_iface_concurrency_matrix)(
         wifi_handle handle, wifi_iface_concurrency_matrix *matrix);
 
+    /**@brief wifi_enable_sta_channel_for_peer_network
+     *        enable or disable the feature of allowing current STA-connected
+     *        channel for WFA GO, SAP and Wi-Fi Aware when the regulatory allows.
+     * @param handle global wifi_handle
+     * @param channelCategoryEnableFlag bitmask of |wifi_channel_category|.
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_enable_sta_channel_for_peer_network)(
+        wifi_handle handle, u32 channelCategoryEnableFlag);
+
+    /**@brief wifi_nan_suspend_request
+     * Request that the specified NAN session be suspended.
+     * @param transaction_id: NAN transaction id
+     * @param wifi_interface_handle
+     * @param NanSuspendRequest request message
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_nan_suspend_request)(transaction_id id, wifi_interface_handle iface,
+                                                   NanSuspendRequest *msg);
+
+    /**@brief wifi_nan_resume_request
+     * Request that the specified NAN session be resumed.
+     * @param transaction_id: NAN transaction id
+     * @param wifi_interface_handle
+     * @param NanResumeRequest request message
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_nan_resume_request)(transaction_id id, wifi_interface_handle iface,
+                                                   NanResumeRequest *msg);
+
+    wifi_error (*wifi_nan_pairing_request)(
+        transaction_id id, wifi_interface_handle iface,
+        NanPairingRequest *msg);
+    wifi_error (*wifi_nan_pairing_indication_response)(
+    transaction_id id, wifi_interface_handle iface,
+        NanPairingIndicationResponse *msg);
+    wifi_error (*wifi_nan_bootstrapping_request)(
+        transaction_id id, wifi_interface_handle iface,
+        NanBootstrappingRequest *msg);
+    wifi_error (*wifi_nan_bootstrapping_indication_response)(
+        transaction_id id, wifi_interface_handle iface,
+        NanBootstrappingIndicationResponse *msg);
+
+    /**@brief wifi_set_scan_mode
+     *        Notify driver/firmware current is scan only mode to allow lower
+     *        level to optimize power consumption.
+     * @param enable true if current is scan only mode
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_set_scan_mode)(const char * ifname, bool enable);
+
+    wifi_error (*wifi_nan_pairing_end)(transaction_id id,
+                                    wifi_interface_handle iface,
+                                    NanPairingEndRequest *msg);
+
+    /**@brief wifi_set_mlo_mode
+     * Set Multi-Link Operation mode.
+     * @param handle global wifi_handle
+     * @param mode: MLO mode
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_set_mlo_mode)(wifi_handle handle, wifi_mlo_mode mode);
+
     /*
      * when adding new functions make sure to add stubs in
-     * hal_tool.cpp::init_wifi_stub_hal_func_table
+     * wifi_legacy_hal_stubs.cpp::initHalFuncTableWithStubs
      */
 } wifi_hal_fn;
 

@@ -2492,6 +2492,15 @@ typedef struct {
 
     /* Publish or Subscribe Id of an earlier Publish/Subscribe */
     u16 publish_subscribe_id;
+
+    /* configure CSIA (Cipher Suite Information attribute) capability to specify GTK, IGTK, BIGTK
+       are supported or not
+    */
+    u8 csia_capabilities;
+
+    /* configure GTK(Group Transient Key) protection required or not */
+    u8 gtk_protection;
+
 } NanDataPathInitiatorRequest;
 
 /*
@@ -2552,6 +2561,14 @@ typedef struct {
       Discovery MAC addr of the publisher/peer
     */
     u8 peer_disc_mac_addr[NAN_MAC_ADDR_LEN];
+
+    /* configure CSIA (Cipher Suite Information attribute) capability to specify GTK, IGTK, BIGTK
+       are supported or not
+    */
+    u8 csia_capabilities;
+
+    /* configure GTK(Group Transient Key) protection required or not */
+    u8 gtk_protection;
 } NanDataPathIndicationResponse;
 
 /* Sub slot parameters */
@@ -2606,6 +2623,14 @@ typedef struct {
        for setting up the Secure Data Path.
     */
     u8 scid[NAN_MAX_SCID_BUF_LEN];
+
+    /* configure CSIA (Cipher Suite Information attribute) capability to specify GTK, IGTK, BIGTK
+       are supported or not
+    */
+    u8 csia_capabilities;
+
+    /* configure GTK(Group Transient Key) protection required or not */
+    u8 gtk_protection;
 } NanDataPathRequestInd;
 
 /*

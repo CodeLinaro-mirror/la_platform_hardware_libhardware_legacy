@@ -2850,7 +2850,7 @@ typedef struct {
   Initiator side
 */
 typedef struct {
-    /* Publish or Subscribe Id of an earlier Publish/Subscribe */
+    /* Publish instance id generated on Publisher side corresponding to a session */
     u16 publish_subscribe_id;
     /*
       This Id is the Requestor Instance that is passed as
@@ -2923,6 +2923,9 @@ typedef struct {
   NAN pairing bootstrapping initiator request
 */
 typedef struct {
+    /* Publish or Subscribe Id of local Publish/Subscribe */
+    u16 publish_subscribe_id;
+
     /*
        This Id is the Requestor Instance that is passed as
        part of earlier MatchInd/FollowupInd message.
@@ -2951,6 +2954,9 @@ typedef struct {
     u16 sdea_service_specific_info_len;
     u8 sdea_service_specific_info[NAN_MAX_SDEA_SERVICE_SPECIFIC_INFO_LEN];
 
+    /* Indicates that this is comeback Bootstrapping request */
+    u8 comeback;
+
     /* The length of cookie. */
     u32 cookie_length;
 
@@ -2962,9 +2968,11 @@ typedef struct {
  NAN pairing bootstrapping response from responder to a initate request
 */
 typedef struct {
+    /* Publish or Subscribe Id of local Publish/Subscribe */
+    u16 publish_subscribe_id;
 
     /*
-       This Id is the Requestor Instance that is passed as
+       This Id is the Peer Instance that is passed as
        part of earlier MatchInd/FollowupInd message.
     */
     u32 service_instance_id;
@@ -3001,7 +3009,7 @@ typedef struct {
 } NanBootstrappingIndicationResponse;
 
 /*
-  Event indication received on the responder side when a Nan boostrapping session is initiated on
+  Event indication received on the responder side when a Nan bootsrapping session is initiated on
   the Initiator side
 */
 typedef struct {

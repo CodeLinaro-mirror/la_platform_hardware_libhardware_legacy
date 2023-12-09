@@ -126,7 +126,7 @@ typedef enum {
  */
 typedef enum {
   WIFI_VOIP_MODE_OFF = 0,
-  WIFI_VOIP_MODE_ON  = 1,
+  WIFI_VOIP_MODE_VOICE  = 1,
 } wifi_voip_mode;
 
 /* List of interface types supported */
@@ -469,6 +469,7 @@ void wifi_get_error_info(wifi_error err, const char **msg); // return a pointer 
 #define WIFI_FEATURE_INFRA_60G          (uint64_t)0x100000000 // Support for 60GHz Band
 #define WIFI_FEATURE_AFC_CHANNEL        (uint64_t)0x200000000 // Support for setting 6GHz AFC channel allowance
 #define WIFI_FEATURE_T2LM_NEGO          (uint64_t)0x400000000 // Support for TID-To-Link mapping negotiation
+#define WIFI_FEATURE_ROAMING_MODE_CONTROL   (uint64_t)0x800000000 // Support for configuring roaming mode
 // Add more features here
 
 #define IS_MASK_SET(mask, flags)        (((flags) & (mask)) == (mask))

@@ -764,9 +764,12 @@ typedef struct {
     wifi_error (* wifi_get_valid_channels)(wifi_interface_handle,int, int, wifi_channel *, int *);
     wifi_error (* wifi_rtt_range_request)(wifi_request_id, wifi_interface_handle, unsigned,
             wifi_rtt_config[], wifi_rtt_event_handler);
+    wifi_error (* wifi_rtt_range_request_v3)(wifi_request_id, wifi_interface_handle, unsigned,
+            wifi_rtt_config_v3[], wifi_rtt_event_handler_v3);
     wifi_error (* wifi_rtt_range_cancel)(wifi_request_id,  wifi_interface_handle, unsigned,
             mac_addr[]);
     wifi_error (* wifi_get_rtt_capabilities)(wifi_interface_handle, wifi_rtt_capabilities *);
+    wifi_error (* wifi_get_rtt_capabilities_v3)(wifi_interface_handle, wifi_rtt_capabilities_v3 *);
     wifi_error (* wifi_rtt_get_responder_info)(wifi_interface_handle iface,
             wifi_rtt_responder *responder_info);
     wifi_error (* wifi_enable_responder)(wifi_request_id id, wifi_interface_handle iface,

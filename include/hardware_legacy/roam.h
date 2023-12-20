@@ -30,7 +30,8 @@ typedef struct {
 
 typedef enum {
     ROAMING_DISABLE,
-    ROAMING_ENABLE
+    ROAMING_ENABLE,
+    ROAMING_AGGRESSIVE
 } fw_roaming_state_t;
 
 typedef struct {

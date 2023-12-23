@@ -40,8 +40,15 @@ static std::unordered_map<std::string, std::shared_ptr<IWakeLock>> gWakeLockMap;
 
 static const std::shared_ptr<ISystemSuspend> getSystemSuspendServiceOnce() {
     static std::shared_ptr<ISystemSuspend> suspendService =
-        ISystemSuspend::fromBinder(ndk::SpAIBinder(AServiceManager_waitForService(
-            (ISystemSuspend::descriptor + std::string("/default")).c_str())));
+        []() -> std::shared_ptr<ISystemSuspend> {
+        std::string suspendServiceName =
+            ISystemSuspend::descriptor + std::string("/default");
+        if (!AServiceManager_isDeclared(suspendServiceName.c_str())) {
+            return nullptr;
+        }
+        return ISystemSuspend::fromBinder(ndk::SpAIBinder(
+            AServiceManager_waitForService(suspendServiceName.c_str())));
+    }();
     return suspendService;
 }
 

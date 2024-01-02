@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ *
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 #ifndef __WIFI_HAL_H__
 #define __WIFI_HAL_H__
 
@@ -22,8 +29,12 @@ extern "C"
 {
 #endif
 #include <stdint.h>
+#include <stdio.h>
+#include <stddef.h>
 
+#ifndef IFNAMSIZ
 #define IFNAMSIZ 16
+#endif
 #define UNSPECIFIED -1 // wifi HAL common definition for unspecified value
 
 /* typedefs */

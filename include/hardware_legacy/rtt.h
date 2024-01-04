@@ -193,6 +193,8 @@ typedef struct {
   u64 ntb_max_measurement_time;    // Maximum non-trigger based (non-TB) dynamic measurement
                                    // time in units of 10 milliseconds assigned by the 11az
                                    // responder.
+  byte num_tx_sts;                 // Number of transmit space-time streams used.
+  byte num_rx_sts;                 // Number of receive space-time streams used.
 } wifi_rtt_result_v3;
 
 

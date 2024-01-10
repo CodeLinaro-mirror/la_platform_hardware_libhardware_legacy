@@ -16,8 +16,6 @@
 
 #include <hardware_legacy/uevent.h>
 
-#include <log/log.h>
-
 #include <malloc.h>
 #include <string.h>
 #include <unistd.h>
@@ -95,16 +93,6 @@ int uevent_next_event(char* buffer, int buffer_length)
 
                 return count;
             } 
-        }
-
-        if (nr > 0 && (fds.revents & POLLERR)) {
-            int error = 0;
-            socklen_t errlen = sizeof(error);
-            getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &errlen);
-
-            // see b/300009377, this used to be an infinite loop
-            // abort to try to recover
-            LOG_ALWAYS_FATAL("Uevent POLLERR: %s, on FD %d", strerror(error), fd);
         }
     }
     

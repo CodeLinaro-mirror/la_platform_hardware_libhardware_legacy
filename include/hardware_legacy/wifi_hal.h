@@ -1170,7 +1170,7 @@ typedef struct {
      * @param config_id: configuration ID of TWT request
      * @return Synchronous wifi_error
      *
-     * Note: This function is deprecated by wifi_twt_session_clear_stats
+     * Note: This function is deprecated.
      */
     wifi_error (*wifi_twt_clear_stats)(wifi_interface_handle iface, u8 config_id);
 

@@ -79,7 +79,6 @@ cc_library_shared {
     shared_libs: [
         "android.system.suspend-V1-ndk",
         "libdl",
-        "liblog",
     ],
 
     header_libs: [

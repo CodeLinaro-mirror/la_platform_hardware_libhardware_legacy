@@ -1025,6 +1025,16 @@ typedef struct {
      */
     wifi_error (*wifi_twt_get_capabilities)(wifi_interface_handle iface,
                                             wifi_twt_capabilities* capabilities);
+
+    /**
+     * Register TWT events before sending any TWT request
+     *
+     * @param wifi_interface_handle:
+     * @param events: TWT events callbacks to register
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_twt_register_events)(wifi_interface_handle iface, wifi_twt_events events);
+
     /**
      * Setup a TWT session.
      *
@@ -1035,11 +1045,10 @@ typedef struct {
      * @param id Identifier for the command. The value 0 is reserved.
      * @param iface Wifi interface handle
      * @param request TWT request parameters
-     * @param events TWT events
      * @return Synchronous wifi_error
     */
     wifi_error (*wifi_twt_session_setup)(wifi_request_id id, wifi_interface_handle iface,
-                                 wifi_twt_request request, wifi_twt_events events);
+                                 wifi_twt_request request);
     /**
      * Update a TWT session.
      *
@@ -1116,7 +1125,7 @@ typedef struct {
      * @param TwtCallbackHandler: callback function pointers
      * @return Synchronous wifi_error
      *
-     * Note: This function is deprecated
+     * Note: This function is deprecated by wifi_twt_register_events
      */
     wifi_error (*wifi_twt_register_handler)(wifi_interface_handle iface,
                                             TwtCallbackHandler handler);

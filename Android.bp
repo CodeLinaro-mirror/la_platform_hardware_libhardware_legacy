@@ -46,9 +46,6 @@ cc_library {
     export_include_dirs: ["include"],
     shared_libs: ["android.system.suspend-V1-ndk"],
     vendor_available: true,
-    vndk: {
-        enabled: true,
-    },
     apex_available: [
         "//apex_available:platform",
         "com.android.uwb",
@@ -73,9 +70,6 @@ cc_library_shared {
     name: "libhardware_legacy",
     defaults: ["libpower_defaults"],
     vendor_available: true,
-    vndk: {
-        enabled: true,
-    },
 
     shared_libs: [
         "android.system.suspend-V1-ndk",

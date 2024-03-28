@@ -417,6 +417,24 @@ typedef struct {
     wifi_iface_combination iface_combinations[MAX_IFACE_COMBINATIONS];
 } wifi_iface_concurrency_matrix;
 
+/* Wifi OUI data */
+typedef struct {
+    /* OUI : 24-bit organizationally unique identifier to identify the Vendor/OEM */
+    u32 oui;
+    /* Length of the data buffer */
+    u32 data_len;
+    /* Vendor-specific data */
+    const u8 *data;
+} oui_keyed_data;
+
+/* Wifi Vendor data list */
+typedef struct {
+    /* Number of OUI Keyed Data objects */
+    u32 num_oui_keyed_data;
+    /* List of OUI Keyed Data */
+    oui_keyed_data *oui_data;
+} wifi_vendor_data;
+
 /* Initialize/Cleanup */
 
 wifi_error wifi_initialize(wifi_handle *handle);
@@ -1372,6 +1390,18 @@ typedef struct {
      * @return Synchronous wifi_error
      */
     wifi_error (*wifi_set_mlo_mode)(wifi_handle handle, wifi_mlo_mode mode);
+
+    /**@brief wifi_virtual_interface_create_with_vendor_data
+     * Create new virtual interface using vendor data.
+     * @param handle: global wifi_handle
+     * @param ifname: name of interface to be created.
+     * @param iface_type: one of interface types from wifi_interface_type.
+     * @param vendor_data: vendor data to apply on this interface.
+     * @return Synchronous wifi_error
+     */
+    wifi_error (*wifi_virtual_interface_create_with_vendor_data)
+            (wifi_handle handle, const char* ifname,
+             wifi_interface_type iface_type, wifi_vendor_data* vendor_data);
 
     /*
      * when adding new functions make sure to add stubs in

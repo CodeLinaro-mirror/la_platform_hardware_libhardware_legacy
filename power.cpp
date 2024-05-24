@@ -70,9 +70,8 @@ int acquire_wake_lock(int, const char* id) {
             LOG(ERROR) << "ISuspendService::acquireWakeLock() call failed: "
                        << status.getDescription();
             return -1;
-        } else {
-            gWakeLockMap[id] = wl;
         }
+        gWakeLockMap[id] = wl;
     }
     return 0;
 }

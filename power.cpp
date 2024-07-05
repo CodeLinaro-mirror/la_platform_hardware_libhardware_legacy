@@ -60,6 +60,31 @@ int acquire_wake_lock(int, const char* id) {
         return -1;
     }
 
+#ifdef ENABLE_NO_LOCK_BINDER_TXN
+    bool hasLock;
+    {
+        std::lock_guard<std::mutex> l{gLock};
+        hasLock = !!gWakeLockMap[id];
+    }
+    if (hasLock)
+        return 0;
+
+    std::shared_ptr<IWakeLock> wl = nullptr;
+    auto status =
+        suspendService->acquireWakeLock(WakeLockType::PARTIAL, id, &wl);
+    // It's possible that during device shutdown SystemSuspend service has
+    // already exited. Check that the wakelock object is not null.
+    if (!wl) {
+        LOG(ERROR) << "ISuspendService::acquireWakeLock() call failed: "
+                   << status.getDescription();
+        return -1;
+    }
+    {
+        std::lock_guard<std::mutex> l{gLock};
+        // Check if another thread has already set it.
+        if (!gWakeLockMap[id]) gWakeLockMap[id] = wl;
+    }
+#else
     std::lock_guard<std::mutex> l{gLock};
     if (!gWakeLockMap[id]) {
         std::shared_ptr<IWakeLock> wl = nullptr;
@@ -73,6 +98,7 @@ int acquire_wake_lock(int, const char* id) {
         }
         gWakeLockMap[id] = wl;
     }
+#endif
     return 0;
 }
 

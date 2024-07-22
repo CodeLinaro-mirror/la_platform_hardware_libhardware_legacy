@@ -133,9 +133,10 @@ TEST_F(WakeLockTest, WakeLockDestructor) {
         ASSERT_TRUE(info.isActive);
     }
 
-    // SystemSuspend receives wake lock release requests on hwbinder thread, while stats requests
-    // come on binder thread. Sleep to make sure that stats are reported *after* wake lock release.
-    std::this_thread::sleep_for(1ms);
+    // Allow the system suspend service sufficient time to release the wake
+    // lock, obtain the autosuspend lock to decrement the suspend counter and
+    // update the wake lock stats.
+    std::this_thread::sleep_for(50ms);
     WakeLockInfo info;
     auto success = findWakeLockInfoByName(name, &info);
     ASSERT_TRUE(success);

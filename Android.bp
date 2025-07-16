@@ -21,11 +21,6 @@ license {
 cc_library_headers {
     name: "libhardware_legacy_headers",
     vendor_available: true,
-    min_sdk_version: "35",
-    apex_available: [
-        "//apex_available:platform",
-        "com.android.nfcservices",
-    ],
     export_include_dirs: ["include"],
 
     header_libs: ["libcutils_headers"],
@@ -93,11 +88,6 @@ cc_library_shared {
     defaults: ["libpower_defaults"],
     vendor_available: true,
 
-    min_sdk_version: "35",
-    apex_available: [
-        "//apex_available:platform",
-        "com.android.nfcservices",
-    ],
     shared_libs: [
         "android.system.suspend-V1-ndk",
         "libdl",

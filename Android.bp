@@ -60,6 +60,7 @@ cc_library_libpower {
     vendor_available: true,
     apex_available: [
         "//apex_available:platform",
+        "com.android.nfcservices",
         "com.android.uwb",
     ],
     min_sdk_version: "Tiramisu",

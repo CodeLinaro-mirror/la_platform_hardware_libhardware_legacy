@@ -16,12 +16,14 @@
 
 #include <hardware_legacy/uevent.h>
 
+#include <errno.h>
 #include <malloc.h>
 #include <string.h>
 #include <unistd.h>
 #include <poll.h>
 #include <pthread.h>
 
+#include <cutils/log.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/queue.h>
@@ -76,13 +78,31 @@ int uevent_next_event(char* buffer, int buffer_length)
     while (1) {
         struct pollfd fds;
         int nr;
-    
+
         fds.fd = fd;
         fds.events = POLLIN;
         fds.revents = 0;
         nr = poll(&fds, 1, -1);
-     
-        if(nr > 0 && (fds.revents & POLLIN)) {
+
+        if (nr < 0) {
+            // Log the error and sleep to prevent busy-looping
+            ALOGE("poll() failed: %s, sleeping 100ms", strerror(errno));
+            usleep(100000); // 100ms
+            continue;
+        }
+
+        if (nr > 0 && (fds.revents & (POLLIN|POLLERR))) {
+            if (fds.revents & POLLERR) {
+                // Socket error, clear the error and continue
+                int error = 0;
+                socklen_t errlen = sizeof(error);
+                if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &errlen) == -1) {
+                    ALOGE("getsockopt failed: %s", strerror(errno));
+                } else {
+                    ALOGE("Uevent socket POLLERR: %s", strerror(error));
+                }
+            }
+
             int count = recv(fd, buffer, buffer_length, 0);
             if (count > 0) {
                 struct uevent_handler *h;
@@ -92,10 +112,10 @@ int uevent_next_event(char* buffer, int buffer_length)
                 pthread_mutex_unlock(&uevent_handler_list_lock);
 
                 return count;
-            } 
+            }
         }
     }
-    
+
     // won't get here
     return 0;
 }

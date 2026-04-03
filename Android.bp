@@ -84,6 +84,7 @@ cc_test {
     require_root: true,
 }
 
+// this library should be deleted
 cc_library_shared {
     name: "libhardware_legacy",
     defaults: ["libpower_defaults"],
